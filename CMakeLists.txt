@@ -1,95 +1,56 @@
-cmake_minimum_required(VERSION 3.17.0)
-project(MathFunctions VERSION "0.0.1")
+cmake_minimum_required(VERSION 3.15)
+project(MathFunctions)
 
+# make cache variables for install destinations
+include(GNUInstallDirs)
 
-add_library(MathFunctions  "${CMAKE_CURRENT_LIST_DIR}/MathFunctions.cxx" )
-add_library(MathFunctions::MathFunctions ALIAS MathFunctions)
+# specify the C++ standard
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-target_include_directories(MathFunctions BEFORE PUBLIC 
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/> 
-  $<INSTALL_INTERFACE:${include_install_dir}/>)
+add_library(MathFunctionscbrt STATIC MathFunctionscbrt.cxx)
 
-#
-
-find_package(Threads)
-target_link_libraries(MathFunctions
-  
-  ${CMAKE_THREAD_LIBS_INIT}
-)
-
-set(include_install_dir "include")
-# Installing
-
-# Layout. This works for all platforms:
-#   * <prefix>/lib/cmake/<PROJECT-NAME>
-#   * <prefix>/lib/
-#   * <prefix>/include/
-set(config_install_dir "lib/cmake/${PROJECT_NAME}")
-
-set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
-
-# Configuration
-set(version_config "${generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
-set(project_config "${generated_dir}/${PROJECT_NAME}Config.cmake")
-set(targets_export_name "${PROJECT_NAME}Targets")
-set(namespace "${PROJECT_NAME}::")
-
-# Include module with fuction 'write_basic_package_version_file'
-include(CMakePackageConfigHelpers)
-
-# Configure '<PROJECT-NAME>ConfigVersion.cmake'
-# Note: PROJECT_VERSION is used as a VERSION
-write_basic_package_version_file(
-    "${version_config}" COMPATIBILITY SameMajorVersion
-)
-
-# Configure '<PROJECT-NAME>Config.cmake'
-# Use variables:
-#   * targets_export_name
-#   * PROJECT_NAME
-configure_package_config_file(
-    "${CMAKE_CURRENT_LIST_DIR}/cmake/modules/Config.cmake.in"
-    "${project_config}"
-    INSTALL_DESTINATION "${config_install_dir}"
+target_include_directories(MathFunctionscbrt
+                           PUBLIC
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
+                           "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
 
-# Targets:
-install(
-    TARGETS MathFunctions
-    EXPORT "${targets_export_name}"
-    LIBRARY DESTINATION "lib"
-    ARCHIVE DESTINATION "lib"
-    RUNTIME DESTINATION "bin"
-    INCLUDES DESTINATION "${include_install_dir}"
+install(TARGETS MathFunctionscbrt
+        EXPORT MathFunctionscbrtTargets
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-# Headers:
-install(
-    DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/
-    DESTINATION "${include_install_dir}"
-    FILES_MATCHING PATTERN "*.[ih]*"
-    PATTERN ${CMAKE_CURRENT_BINARY_DIR}/build EXCLUDE
-     PATTERN "/build*" EXCLUDE 
- PATTERN ".git/*" EXCLUDE 
- PATTERN ".tipistore/*" EXCLUDE 
- PATTERN "doc/*" EXCLUDE 
- PATTERN "node_modules/*" EXCLUDE 
+install(FILES MathFunctionscbrt.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(EXPORT MathFunctionscbrtTargets
+        FILE MathFunctionscbrtTargets.cmake
+        NAMESPACE MathFunctionscbrt::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MathFunctionscbrt
+)
+add_library(MathFunctions STATIC MathFunctions.cxx)
+
+target_include_directories(MathFunctions
+                           PUBLIC
+                           "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>"
+                           "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
 
 
-
-# Config
-#   * <prefix>/lib/cmake/modern-cmake-examples-simple-project/modern-cmake-examples-simple-projectConfig.cmake
-#   * <prefix>/lib/cmake/modern-cmake-examples-simple-project/modern-cmake-examples-simple-projectConfigVersion.cmake
-#   * <prefix>/lib/cmake/modern-cmake-examples-simple-project/modern-cmake-examples-simple-projectTargets.cmake
-install(
-    FILES "${project_config}" "${version_config}"
-    DESTINATION "${config_install_dir}"
-)
-install(
-    EXPORT "${targets_export_name}"
-    NAMESPACE "${namespace}"
-    DESTINATION "${config_install_dir}"
+install(TARGETS MathFunctions
+        EXPORT MathFunctionsTargets
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
+install(FILES MathFunctions.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(EXPORT MathFunctionsTargets
+        FILE MathFunctionsTargets.cmake
+        NAMESPACE MathFunctions::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MathFunctions
+)
